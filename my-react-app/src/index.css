@@ -66,3 +66,14 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+input, textarea, select {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  background: #1a1a1a;
+  color: inherit;
+  border: 1px solid #333;
+  border-radius: 8px;
+}
+label { font-weight: 600; }
+textarea { min-height: 80px; resize: vertical; }
