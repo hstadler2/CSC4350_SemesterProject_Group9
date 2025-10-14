@@ -1,4 +1,3 @@
-// src/lib/appointmentsStore.js
 const KEY = 'meditrack.appointments.v1'
 
 export function loadAppointments() {

@@ -1,4 +1,3 @@
-// src/pages/AppointmentsPage.jsx
 import { useEffect, useMemo, useState } from 'react'
 import { addAppointment, loadAppointments, removeAppointment } from '../lib/appointmentsStore'
 
