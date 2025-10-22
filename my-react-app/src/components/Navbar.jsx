@@ -3,9 +3,11 @@ import {X, Menu} from 'lucide-react'  //npm install lucide-react
 import placeholder from '../assets/placeholder.png'
 import {navItems } from "../content/index"
 
-const Navbar = () => {
+// navbar recieves the user Role and toggle function as props
+const Navbar = ({User, onToggleLogin}) => {
     // state hook for mobile and for sign/out
     const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
+    
     const [isLoggedIn, SetisLoggedIn] = useState(false)
 
     const toggleNavbar = () =>{
@@ -15,6 +17,11 @@ const Navbar = () => {
     const handleLogin = () => {
         SetisLoggedIn(!isLoggedIn)
     }
+
+    // determine button text based on userRole
+    const bttnText = User
+    ? `Sign Out(${User.charAt(0).toUpperCase() + User.slice(1)})`
+    : "Sign In"
 
   return (
     <div className="navbar">
@@ -32,7 +39,7 @@ const Navbar = () => {
 
         {/* sign in button */}
         <button onClick={handleLogin} className="signin-bttn">
-            {isLoggedIn ? "Sign Out" : "SignIn"}
+            {bttnText}
         </button>
 
         {/* mobile menu */}
