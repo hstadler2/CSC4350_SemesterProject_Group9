@@ -2,6 +2,7 @@ import { useState } from "react"
 import {X, Menu} from 'lucide-react'  //npm install lucide-react
 import placeholder from '../assets/placeholder.png'
 import {navItems } from "../content/index"
+import { useNavigate, NavLink } from "react-router-dom"
 
 // navbar recieves the user Role and toggle function as props
 const Navbar = ({User, onToggleLogin}) => {
@@ -9,14 +10,24 @@ const Navbar = ({User, onToggleLogin}) => {
     const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
     
     const [isLoggedIn, SetisLoggedIn] = useState(false)
-
+    
+    const navigate = useNavigate()
+    
     const toggleNavbar = () =>{
         setMobileDrawerOpen(!mobileDrawerOpen)
     }
 
     const handleLogin = () => {
-        SetisLoggedIn(!isLoggedIn)
+        if (isLoggedIn) { 
+            //if user is logged in and wants to logout setlogin state to false
+            SetisLoggedIn(false) 
+        } else{
+            // if user is not logged in take user to login page
+            navigate('/login')
+        }
     }
+
+    // TODO: handleLogout
 
     // determine button text based on userRole
     const bttnText = User
@@ -32,7 +43,10 @@ const Navbar = ({User, onToggleLogin}) => {
         <ul className="dekstop-nav">
             {navItems.map((item, index) => (
                 <li key={index}>
-                    <a href={item.href}>{item.label}</a>
+                    <NavLink
+                        to={item.href}>
+                        {item.label}
+                    </NavLink>
                 </li>
             ))}
         </ul>
@@ -54,7 +68,12 @@ const Navbar = ({User, onToggleLogin}) => {
                 <ul>
                     {navItems.map((item, index) => (
                     <li key={index}>
-                        <a href={item.href}>{item.label}</a>
+                        <NavLink
+                            to={item.href}
+                            onClick ={()=>setMobileDrawerOpen(false)}
+                            >
+                            {item.label}
+                        </NavLink>
                     </li>
                 ))}
                 </ul>

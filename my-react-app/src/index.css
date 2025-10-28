@@ -1,3 +1,27 @@
+:root {
+  /* Main Colors */
+  --primary-color: rgb(104, 125, 207);
+  --primary-hover: rgb(0, 82, 163);
+  --secondary-color: rgb(132, 0, 0);
+  --secondary-hover: rgb(163, 0, 0);
+  
+  /* Text Colors */
+  --text-dark: rgb(51, 51, 51);
+  --text-light: rgb(102, 102, 102);
+  --text-placeholder: rgb(153, 153, 153);
+  
+  /* Neutral Colors */
+  --white: rgb(255, 255, 255);
+  --border-color: rgb(224, 224, 224);
+  --bg-light: rgb(249, 249, 249);
+  --bg-hover: rgb(232, 240, 255);
+  
+  /* Shadows */
+  --shadow-light: rgba(0, 0, 0, 0.1);
+  --shadow-medium: rgba(0, 0, 0, 0.2);
+  --shadow-button: rgba(0, 82, 163, 0.3);
+}
+
 *{
   margin: 0;
   padding: 0;
@@ -23,9 +47,9 @@ a{
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
-    background: rgb(96, 110, 164);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border-bottom: 1px solid #e0e0e0;
+    background: var(--primary-color);
+    box-shadow: 0 2px 8px var(--shadow-light);
+    border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
     z-index: 50;
@@ -67,8 +91,8 @@ a{
 
 /* Sign In Button */
 .signin-bttn {
-    background-color: #840000;
-    color: white;
+    background-color: var(--secondary-color);
+    color: var(--white);
     border: none;
     padding: 0.625rem 1.5rem;
     border-radius: 6px;
@@ -80,9 +104,9 @@ a{
 }
 
 .signin-bttn:hover {
-    background-color: #0052a3;
+    background-color: var(--primary-hover);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 82, 163, 0.3);
 }
 
 /* Mobile Menu Toggle Button */
@@ -113,9 +137,9 @@ a{
     top: 100%;
     left: 0;
     right: 0;
-    background: white;
-    border-bottom: 1px solid #e0e0e0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: var(--white);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px var(--shadow-light);
     padding: 1rem 2rem;
 }
 
@@ -143,6 +167,152 @@ a{
 .mobile-nav a:hover {
     background-color: #e8f0ff;
     color: #0066cc;
+}
+
+/* ============================================
+   LOGIN & SIGNUP PAGE STYLES
+   ============================================ */
+
+/* Container - Centers the form on the page */
+.login-container,
+.signUp-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--primary-color);
+  padding: 20px;
+}
+
+/* Form Box */
+.login-box,
+.signup-box {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 40px;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 8px 24px var(--shadow-medium);
+}
+
+/* Logo */
+.login-box .logo,
+.signup-box .logo {
+  width: 80px;
+  height: 80px;
+  display: block;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Headings */
+.login-box h2,
+.signup-box h2 {
+  text-align: center;
+  color: var(--text-dark);
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.login-box p {
+  text-align: center;
+  color: var(--text-light);
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+
+/* Form Styling */
+.login-box form,
+.signup-box form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Labels */
+.login-box label,
+.signup-box label {
+  color: var(--text-dark);
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* Input Fields */
+.login-box input,
+.signup-box input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  outline: none;
+  background: var(--bg-light);
+}
+
+.login-box input:focus,
+.signup-box input:focus {
+  border-color: var(--primary-color);
+  background: var(--white);
+  box-shadow: 0 0 0 3px rgba(104, 125, 207, 0.1);
+}
+
+.login-box input::placeholder,
+.signup-box input::placeholder {
+  color: var(--text-placeholder);
+}
+
+/* Submit Button */
+.login-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--secondary-color);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.login-btn:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 82, 163, 0.3);
+}
+
+.login-btn:active {
+  transform: translateY(0);
+}
+
+/* Sign up / Login Link */
+.signup-link,
+.login-link {
+  text-align: center;
+  color: var(--text-light);
+  font-size: 14px;
+  margin-top: 20px;
+}
+
+.signup-link a,
+.login-link a {
+  color: var(--secondary-color);
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: 5px;
+  transition: color 0.3s ease;
+}
+
+.signup-link a:hover,
+.login-link a:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
 }
 
 /* Responsive Design - Mobile */
@@ -188,4 +358,22 @@ a{
     .mobile-nav a {
         padding: 0.5rem;
     }
+}
+
+/* Login/Signup Responsive Design */
+@media (max-width: 480px) {
+  .login-box,
+  .signup-box {
+    padding: 30px 20px;
+  }
+
+  .login-box h2,
+  .signup-box h2 {
+    font-size: 24px;
+  }
+
+  .login-btn {
+    padding: 12px;
+    font-size: 14px;
+  }
 }

@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import Navbar from './components/navbar'
 import Home from './pages/Home'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import Login from './pages/Login'
+import Signup from './pages/Signup'
+import RootLayout from './Layout/RootLayout'
 
 const App = () => {
   // state track for current user
@@ -17,11 +21,19 @@ const App = () => {
     }
   }
   return (
-    <div>
-      {/* pass state to Navbar and role to home page*/}
-      <Navbar User={User} onToggleLogin={handleToggleLogin}/>
-      <Home User={User}/>
-    </div>
+    <Router>
+        <Routes>
+          {/* All routes that should include the Navbar go inside RootLayout */}
+        <Route element={<RootLayout User={User} onToggleLogin={handleToggleLogin} />}>
+          <Route index element={<Home User={User} />} />
+          {/* add other protected routes here */}
+        </Route>
+          
+          {/* login and signup should not have navbar */}
+          <Route path='/login' element={<Login/>}/>
+          <Route path='/signup' element={<Signup/>}/>
+        </Routes>
+    </Router>
   )
 }
 
