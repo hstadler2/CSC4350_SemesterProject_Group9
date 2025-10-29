@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { addAppointment, loadAppointments, removeAppointment } from '../lib/appointmentsStore'
+import { getProviderOptions, getStaffById } from '../lib/staffStore'
 
 const initialForm = {
   patient: '',
@@ -7,7 +8,8 @@ const initialForm = {
   date: '',
   start: '',
   durationMins: '30',
-  provider: '',
+  providerId: '',   // NEW: link to staff provider
+  providerText: '', // fallback if no staff exist yet
   location: '',
 }
 
@@ -15,21 +17,25 @@ export default function AppointmentsPage() {
   const [form, setForm] = useState(initialForm)
   const [items, setItems] = useState([])
   const [errors, setErrors] = useState({})
+  const [providers, setProviders] = useState([])
 
   useEffect(() => {
     setItems(loadAppointments())
+    setProviders(getProviderOptions()) // [{value,label}]
   }, [])
 
   const sorted = useMemo(() => {
     return [...items].sort((a, b) => new Date(a.startIso) - new Date(b.startIso))
   }, [items])
 
+  const hasStaff = providers.length > 0
+
   function handleChange(e) {
     const { name, value } = e.target
     setForm(f => ({ ...f, [name]: value }))
   }
 
-  function validate() {
+  function validate(newStartIso) {
     const errs = {}
     if (!form.patient.trim()) errs.patient = 'Patient is required'
     if (!form.date) errs.date = 'Date is required'
@@ -37,22 +43,46 @@ export default function AppointmentsPage() {
     if (!/^\d+$/.test(form.durationMins) || Number(form.durationMins) <= 0) {
       errs.durationMins = 'Duration must be a positive number of minutes'
     }
+
+    if (hasStaff) {
+      if (!form.providerId) errs.providerId = 'Choose a provider'
+      else {
+        // Check shift coverage + overlap
+        const start = new Date(newStartIso)
+        const end = new Date(start.getTime() + Number(form.durationMins) * 60 * 1000)
+
+        const shiftOk = isWithinAnyShift(form.providerId, start, end)
+        if (!shiftOk) errs.providerId = 'Time is outside provider shift'
+
+        const overlapOk = !hasOverlap(items, form.providerId, start, end)
+        if (!overlapOk) errs.start = 'Conflicts with an existing appointment'
+      }
+    } else {
+      // No staff yet: require providerText minimally (optional, but helpful)
+      if (!form.providerText.trim()) errs.providerText = 'Enter provider until staff is added'
+    }
     return errs
   }
 
   function onSubmit(e) {
     e.preventDefault()
-    const v = validate()
-    setErrors(v)
-    if (Object.keys(v).length) return
 
     // Build ISO from local date+time
     const startIso = new Date(`${form.date}T${form.start}:00`).toISOString()
 
+    const v = validate(startIso)
+    setErrors(v)
+    if (Object.keys(v).length) return
+
+    const providerName = hasStaff
+      ? (getStaffById(form.providerId)?.name || '')
+      : form.providerText.trim()
+
     const newItems = addAppointment({
       patient: form.patient.trim(),
       reason: form.reason.trim(),
-      provider: form.provider.trim(),
+      provider: providerName,
+      providerId: hasStaff ? form.providerId : null,
       location: form.location.trim(),
       durationMins: Number(form.durationMins),
       startIso,
@@ -96,9 +126,22 @@ export default function AppointmentsPage() {
             <input name="durationMins" value={form.durationMins} onChange={handleChange} />
             {errors.durationMins && <div style={{ color: 'salmon' }}>{errors.durationMins}</div>}
           </div>
+
+          {/* Provider input switches to a select once staff exists */}
           <div>
-            <label>Provider</label><br />
-            <input name="provider" value={form.provider} onChange={handleChange} placeholder="Dr. Smith" />
+            <label>Provider{hasStaff ? '*' : ''}</label><br />
+            {hasStaff ? (
+              <select name="providerId" value={form.providerId} onChange={handleChange}>
+                <option value="">Select provider</option>
+                {providers.map(p => (
+                  <option key={p.value} value={p.value}>{p.label}</option>
+                ))}
+              </select>
+            ) : (
+              <input name="providerText" value={form.providerText} onChange={handleChange} placeholder="Dr. Smith" />
+            )}
+            {hasStaff && errors.providerId && <div style={{ color: 'salmon' }}>{errors.providerId}</div>}
+            {!hasStaff && errors.providerText && <div style={{ color: 'salmon' }}>{errors.providerText}</div>}
           </div>
         </div>
 
@@ -149,4 +192,32 @@ function fmtDateTime(iso) {
   const date = d.toLocaleDateString()
   const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   return `${date} @ ${time}`
+}
+
+// --- scheduling helpers ---
+function toMin(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number)
+  return h * 60 + m
+}
+function isWithinAnyShift(providerId, start, end) {
+  const staff = getStaffById(providerId)
+  if (!staff) return false
+  const wd = start.getDay() // 0..6
+  const startMin = start.getHours() * 60 + start.getMinutes()
+  const endMin = end.getHours() * 60 + end.getMinutes()
+  return staff.shifts.some(sh =>
+    sh.weekday === wd &&
+    toMin(sh.start) <= startMin &&
+    endMin <= toMin(sh.end)
+  )
+}
+function hasOverlap(items, providerId, start, end) {
+  const s = start.getTime()
+  const e = end.getTime()
+  return items.some(a => {
+    if ((a.providerId || null) !== providerId) return false
+    const aStart = new Date(a.startIso).getTime()
+    const aEnd = aStart + (Number(a.durationMins) * 60 * 1000)
+    return Math.max(s, aStart) < Math.min(e, aEnd) // true if overlap
+  })
 }
