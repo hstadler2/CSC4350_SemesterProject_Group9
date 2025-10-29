@@ -1,4 +1,3 @@
-// src/lib/staffStore.js
 const KEY = 'meditrack.staff.v1'
 
 export function loadStaff() {
