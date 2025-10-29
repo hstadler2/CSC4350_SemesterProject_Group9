@@ -1,23 +1,26 @@
-import { Link } from "react-router-dom";
-
 export default function Home() {
   return (
-    <div style={{ textAlign: "center", marginTop: "3rem" }}>
-      <h1>Welcome to the Home Page</h1>
-      <p>This is a simple React Router example.</p>
-      <Link
-        to="/login"
-        style={{
-          color: "white",
-          background: "blue",
-          padding: "10px 15px",
-          borderRadius: "5px",
-          textDecoration: "none",
-        }}
-      >
-        Go to Login Page
-      </Link>
-    </div>
+    <section className="grid gap-6">
+      <h1 className="text-2xl font-bold">Welcome to MdediTrack</h1>
+      <p className="text-gray-700 max-w-prose">
+        Book appointments, view health records, manage prescriptions, and keep up with your
+        schedule. Use a <code>student</code> email for the student experience or an email ending
+        with <code>@staff.edu</code> to see the staff dashboard after login.
+      </p>
+      <div className="grid md:grid-cols-3 gap-4">
+        <Card title="Appointments" text="Create and view your clinic visits." />
+        <Card title="Health Records" text="Securely store and access documents." />
+        <Card title="Prescriptions" text="Track active and past prescriptions." />
+      </div>
+    </section>
   );
 }
 
+function Card({ title, text }) {
+  return (
+    <div className="border rounded-2xl bg-white p-5 shadow-sm">
+      <h3 className="font-semibold mb-1">{title}</h3>
+      <p className="text-gray-600 text-sm">{text}</p>
+    </div>
+  );
+}
