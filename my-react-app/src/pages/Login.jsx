@@ -1,21 +1,45 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import placeholder from '../assets/placeholder.png'
 import { useNavigate, NavLink } from 'react-router-dom'
+import { UserAuth } from '../context/AuthContext'
 
 const Login = () => {
 
     const [loginData, setLoginData] = useState({email:'', password:''})
-    
+    const [error, setError] = useState('')
+    const [loading, setLoading] = useState(false)
+
     const navigate = useNavigate()
+    const{signInUser} = UserAuth() // get signInUser from context
 
     // listens for changes in values, so listens to user input and updates the state
     const handleChange = (e) => {
         setLoginData({...loginData, [e.target.name]: e.target.value})
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
-        console.log("Login attempted:", loginData) //send data to backend
+        setLoading(true)
+        setError('')
+
+        console.log("Login attempted:", loginData)
+        
+        const result = await signInUser(loginData.email, loginData.password)
+        
+        setLoading(false)
+
+        if(result.error){
+            setError(result.error)
+
+            // timeout to clear error message
+            setTimeout(()=>{
+                setError("")
+            }, 3000) // 3 secs
+        } else{
+            // if signup successful take to home page where user will see patient or doctor role
+            navigate("/")
+        }
+
     }
 
   return (
@@ -46,7 +70,11 @@ const Login = () => {
                     required
                 />
 
-                <button type='submit' className='login-btn'>Log-in</button>
+                <button type='submit' className='login-btn'>
+                    {loading ? 'Loggin in...' : 'Log-in'}
+                </button>
+
+                {error && <p className='error-message'>{error}</p>}
 
                 <p className='signup-link'>
                     Don't have an account?

@@ -1,14 +1,17 @@
 import Navbar from "../components/navbar"
 import { Outlet } from "react-router-dom"
+import { AuthContextProvider } from "../context/AuthContext"
 
-const RootLayout = ({User, onToggleLogin}) => {
+const RootLayout = () => {
   return (
-    <div>
-        <Navbar User={User} onToggleLogin={onToggleLogin}/>
-        <div>
-            <Outlet/>
-        </div>
-    </div>
+    <AuthContextProvider>
+      <div>
+          <Navbar/>
+          <div>
+              <Outlet/>
+          </div>
+      </div>
+    </AuthContextProvider>
   )
 }
 

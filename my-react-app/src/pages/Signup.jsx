@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
+import { UserAuth } from '../context/AuthContext'
 
 // TODO: DETERMINE ROLE; only allow patients to sign up
 // * figure out how to create doctor account. Should it be made manually or made here?
@@ -13,34 +14,49 @@ const Signup = () => {
         password: '',
         confirmPassword:''
     })
+    
+    const [error, setError] = useState('')
+    const [loading, setLoading] = useState(false)
 
     const navigate = useNavigate()
+
+    const {signUpNewUser} = UserAuth()
 
     const handleChange = (e) => {
         setSignupData({...signupData, [e.target.name]: e.target.value})
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
+        setLoading(true)
+        setError('')
 
         // make sure passwords match
         if (signupData.password !== signupData.confirmPassword){
-            alert("passwords do not match!")
+            setError("passwords do not match!")
+            setLoading(false)
             return
         }
 
-        const newUser = {
-            ...signupData,
-            role:'patient' //default role for those that signup
+        // call signUpNewUser func
+        const result = await signUpNewUser(
+            signupData.email,
+            signupData.password,
+            {
+                firstName: signupData.firstName,
+                lastName: signupData.lastName,
+                role:'patient'
+            }
+        )
+        setLoading(false)
+
+        if (result.success) {
+            // switch to login page when account is created
+            alert("Account was created successfully")
+            navigate('/login')
+        } else{
+            setError(result.error.message || "Failed to create account")
         }
-
-        console.log("Signup data:", newUser)
-
-        // switch to login page when account is created
-        alert("Account was created successfully")
-        navigate('/login')
-
-        // TODO: connect to backend
     }
 
     return (
@@ -52,7 +68,7 @@ const Signup = () => {
                     <label>First Name</label>
                     <input
                         type='text'
-                        name='firstname'
+                        name='firstName'
                         placeholder='First name'
                         value={signupData.firstName}
                         onChange={handleChange}
@@ -61,7 +77,7 @@ const Signup = () => {
                     <label>Last Name</label>
                     <input
                         type='text'
-                        name='lastname'
+                        name='lastName'
                         placeholder='Last name'
                         value={signupData.lastName}
                         onChange={handleChange}
@@ -97,8 +113,11 @@ const Signup = () => {
                         required
                     />
     
-                    <button type='submit' className='login-btn'>Sign-up</button> 
-                
+                    <button type='submit' disabled={loading} className='login-btn'>
+                        {loading ? 'Signing up...' : 'Sign-Up'}
+                        </button> 
+                    {error && <p className='error-message'>{error}</p>}
+
                 <p className='login-link'>
                     Already have an account?
                     <NavLink to={'/login'}>Login</NavLink>
