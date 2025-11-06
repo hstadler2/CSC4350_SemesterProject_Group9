@@ -1,3 +1,5 @@
+import DoctorDashboard from "../components/DoctorDashboard"
+import PatientDashboard from "../components/PatientDashboard"
 import { UserAuth } from "../context/AuthContext"
 
 const Home = () => {
@@ -19,28 +21,13 @@ const Home = () => {
 
   // display screen for UserRole
   if (role === 'doctor'){
-    return(
-      //  MAY BE BETTER TO CREATE PATIENT AND COTOR DASHBORAD COMPONENTS AND CALL THEM HERE
-      <div data-testid = 'home-page-doctor'>
-        <h1>Doctor Dashboard</h1>
-        <p>View your appointment schedule and pateint charts.</p>
-        <button>View Schedule</button>
-        <button>Prescribe Medication</button>
-
-      </div>
-    )
+    return <DoctorDashboard/>
   }
 
   if (role === 'patient'){
-    return(
-      <div data-testid = 'home-page-patient'>
-        <h1>Patient Dashboard</h1>
-        <p>Manage your appointments or request refills</p>
-        <button>Book Appointment</button>
-        <button>Request refill</button>
-      </div>
-    )
+    return <PatientDashboard/>
   }
+
   // unexpected roles
   return <div> User not recognized.</div>
 }

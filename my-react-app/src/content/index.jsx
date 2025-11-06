@@ -9,3 +9,11 @@ export const navItems = [
     { label: 'Records', href:''},
     { label: 'Settings', href:''},
 ]
+
+// for footer
+export const QuickLink = [
+    { href: '/', text: 'Home' },
+    { href: '/about', text: 'About' },
+    { href: '/services', text: 'Services' },
+    { href: '/contact', text: 'Contact' }
+]
