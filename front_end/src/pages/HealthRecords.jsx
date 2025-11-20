@@ -1,51 +1,92 @@
-import { useState } from "react";
-import { useAuth } from "../auth/AuthContext";
-import { api } from "../utils/api";
+// src/pages/HealthRecords.jsx
+import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { supabase } from "../supabaseClient";
 
-export default function HealthRecords() {
-  const { user } = useAuth();
-  const [title, setTitle] = useState("");
-  const [fileText, setFileText] = useState("");
-  const [records, setRecords] = useState(api.listRecords(user.id));
+const HealthRecords = () => {
+  const { session } = useAuth();              
+  const userId = session?.user?.id || null;   
 
-  const upload = (e) => {
-    e.preventDefault();
-    const rec = api.addRecord({ userId: user.id, title: title || "Untitled", content: fileText });
-    setRecords((r) => [rec, ...r]);
-    setTitle("");
-    setFileText("");
-  };
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    // if we don't have a logged-in user yet, don't try to fetch
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchRecords = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const { data, error } = await supabase
+          .from("health_records")              // <-- your table name here
+          .select("*")
+          .eq("user_id", userId);
+
+        if (error) throw error;
+        setRecords(data || []);
+      } catch (err) {
+        console.error("Error loading health records:", err);
+        setError(err.message || "Failed to load health records.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecords();
+  }, [userId]);
+
+  // not logged in
+  if (!session) {
+    return (
+      <div className="patient-dashboard">
+        <h1>Health Records</h1>
+        <p>Please log in to view your records.</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="patient-dashboard">
+        <h1>Health Records</h1>
+        <p>Loading your records...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="patient-dashboard">
+        <h1>Health Records</h1>
+        <p style={{ color: "red" }}>{error}</p>
+      </div>
+    );
+  }
 
   return (
-    <section className="grid gap-6">
-      <h1 className="text-2xl font-bold">Health Records</h1>
-      <form onSubmit={upload} className="grid gap-3 border bg-white p-4 rounded-2xl">
-        <div className="grid md:grid-cols-2 gap-3">
-          <label className="grid gap-1">
-            <span className="text-sm">Title</span>
-            <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} />
-          </label>
-          <label className="grid gap-1 md:col-span-2">
-            <span className="text-sm">Paste text (demo)</span>
-            <textarea className="input min-h-[100px]" value={fileText} onChange={(e) => setFileText(e.target.value)} />
-          </label>
-        </div>
-        <button className="btn-primary self-start">Upload</button>
-      </form>
+    <div className="patient-dashboard">
+      <h1>Health Records</h1>
 
-      <div className="border bg-white rounded-2xl">
-        <div className="p-4 border-b font-semibold">Your files</div>
-        <ul className="divide-y">
-          {records.map((r) => (
-            <li key={r.id} className="p-4 grid md:grid-cols-3 gap-2 text-sm">
-              <span className="font-medium">{r.title}</span>
-              <span className="truncate">{r.content.slice(0, 100) || "(empty)"}</span>
-              <span className="justify-self-end">{new Date(r.createdAt).toLocaleDateString()}</span>
+      {records.length === 0 ? (
+        <p>No records found.</p>
+      ) : (
+        <ul>
+          {records.map((record) => (
+            <li key={record.id}>
+              {/* render whatever fields your table has */}
+              <strong>{record.title}</strong> – {record.created_at}
             </li>
           ))}
-          {records.length === 0 && <li className="p-4 text-sm text-gray-500">No records uploaded yet.</li>}
         </ul>
-      </div>
-    </section>
+      )}
+    </div>
   );
-}
+};
+
+export default HealthRecords;

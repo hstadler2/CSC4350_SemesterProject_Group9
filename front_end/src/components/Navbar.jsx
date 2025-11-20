@@ -1,91 +1,94 @@
-import { useState } from "react"
-import {X, Menu} from 'lucide-react'  //npm install lucide-react
-import placeholder from '../assets/placeholder.png'
-import {navItems } from "../content/index"
-import { useNavigate, NavLink } from "react-router-dom"
-import { UserAuth } from "../context/AuthContext"
+import { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { Menu, X } from "lucide-react";
 
-// navbar recieves the user Role and toggle function as props
 const Navbar = () => {
-    // state hook for mobile and for sign/out
-    const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
-    const navigate = useNavigate()
-    
-    // use UserAuth to access session and signout
-    const {session, signOut} = UserAuth()
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const { session, signOut } = useAuth();
+  const navigate = useNavigate();
 
-    
-    const toggleNavbar = () =>{
-        setMobileDrawerOpen(!mobileDrawerOpen)
+  const user = session?.user;
+  const role = user?.user_metadata?.role;
+
+  const toggleMobile = () => setMobileOpen(!mobileOpen);
+
+  const handleAuth = async () => {
+    if (user) {
+      await signOut();
+    } else {
+      navigate("/login");
     }
-
-    const handleAuthAction = async () => {
-        if (session) { 
-            //if user is logged in await sign out
-            await signOut() 
-        } else{
-            // if user is not logged in go to login page
-            navigate('/login')
-        }
-    }
-
-    // extract user role
-    const userEmail = session?.user?.email || null
-    const userRole = session?.user?.user_metadata?.role || 'guest'
-
-    // determine button text based on userRole
-    const bttnText = session
-    // the userRole: shoudl show signout (admin) or sign out (patient)"
-    ? `Sign Out(${userRole})`
-    : "Sign In"
+  };
 
   return (
-    <div className="navbar">
-        {/* logo*/}
-        <img src={placeholder} alt="logo" className="logo"/>
+    <nav className="cc-navbar">
+      <div className="cc-navbar-container">
+        
+        {/* LOGO */}
+        <div className="cc-logo">CampusCare</div>
 
-        {/* desktop nav */}
-        <ul className="dekstop-nav">
-            {navItems.map((item, index) => (
-                <li key={index}>
-                    <NavLink
-                        to={item.href}>
-                        {item.label}
-                    </NavLink>
-                </li>
-            ))}
-        </ul>
+        {/* DESKTOP LINKS */}
+        <div className="cc-nav-links">
+          <NavLink to="/" className="cc-link">
+            Home<span className="cc-underline"></span>
+          </NavLink>
 
-        {/* sign in button */}
-        <button onClick={handleAuthAction} className="signin-bttn">
-            {bttnText}
+          {user && (
+            <>
+              <NavLink to="/appointments" className="cc-link">
+                Appointments<span className="cc-underline"></span>
+              </NavLink>
+              <NavLink to="/prescriptions" className="cc-link">
+                Prescriptions<span className="cc-underline"></span>
+              </NavLink>
+              <NavLink to="/records" className="cc-link">
+                Records<span className="cc-underline"></span>
+              </NavLink>
+              <NavLink to="/schedule" className="cc-link">
+                Schedule<span className="cc-underline"></span>
+              </NavLink>
+              <NavLink to="/settings" className="cc-link">
+                Settings<span className="cc-underline"></span>
+              </NavLink>
+            </>
+          )}
+        </div>
+
+        {/* AUTH BUTTON */}
+        <button className="cc-auth-btn" onClick={handleAuth}>
+          {user ? `Logout (${role})` : "Login"}
         </button>
 
-        {/* mobile menu */}
-        <div className="Mobile-menu-toggle">
-            <button onClick={toggleNavbar} className="menu-bttn">
-                {mobileDrawerOpen ? <X/> : <Menu/>}    
-            </button>
+        {/* MOBILE TOGGLE */}
+        <div className="cc-mobile-toggle">
+          <button onClick={toggleMobile}>
+            {mobileOpen ? <X /> : <Menu />}
+          </button>
         </div>
-        {/* will show drawer only on mobile device, fix css */}
-        {mobileDrawerOpen && (
-            <div className="mobile-nav">
-                <ul>
-                    {navItems.map((item, index) => (
-                    <li key={index}>
-                        <NavLink
-                            to={item.href}
-                            onClick ={()=>setMobileDrawerOpen(false)}
-                            >
-                            {item.label}
-                        </NavLink>
-                    </li>
-                ))}
-                </ul>
-            </div>
-        )}
-    </div>
-  )
-}
+      </div>
 
-export default Navbar
+      {/* MOBILE MENU */}
+      {mobileOpen && (
+        <div className="cc-mobile-menu">
+          <NavLink to="/" className="cc-mobile-link">Home</NavLink>
+          {user && (
+            <>
+              <NavLink to="/appointments" className="cc-mobile-link">Appointments</NavLink>
+              <NavLink to="/prescriptions" className="cc-mobile-link">Prescriptions</NavLink>
+              <NavLink to="/records" className="cc-mobile-link">Records</NavLink>
+              <NavLink to="/schedule" className="cc-mobile-link">Schedule</NavLink>
+              <NavLink to="/settings" className="cc-mobile-link">Settings</NavLink>
+            </>
+          )}
+
+          <button onClick={handleAuth} className="cc-mobile-auth-btn">
+            {user ? "Logout" : "Login"}
+          </button>
+        </div>
+      )}
+    </nav>
+  );
+};
+
+export default Navbar;

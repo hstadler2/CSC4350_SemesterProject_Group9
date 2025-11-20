@@ -1,131 +1,174 @@
-import React, { useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
-import { UserAuth } from '../context/AuthContext'
+import React, { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-// TODO: DETERMINE ROLE; only allow patients to sign up
-// * figure out how to create doctor account. Should it be made manually or made here?
-
+// only patients sign up here
 const Signup = () => {
+  const [signupData, setSignupData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
 
-    const [signupData, setSignupData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: '',
-        confirmPassword:''
-    })
-    
-    const [error, setError] = useState('')
-    const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    const navigate = useNavigate()
+  const navigate = useNavigate();
 
-    const {signUpNewUser} = UserAuth()
+  const auth = useAuth() || {};
+  const { signUpNewUser } = auth;
 
-    const handleChange = (e) => {
-        setSignupData({...signupData, [e.target.name]: e.target.value})
+  const handleChange = (e) => {
+    setSignupData({ ...signupData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    if (!signUpNewUser) {
+      setError("Authentication is not initialized. Please refresh.");
+      setLoading(false);
+      return;
     }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        setLoading(true)
-        setError('')
-
-        // make sure passwords match
-        if (signupData.password !== signupData.confirmPassword){
-            setError("passwords do not match!")
-            setLoading(false)
-            return
-        }
-
-        // call signUpNewUser func
-        const result = await signUpNewUser(
-            signupData.email,
-            signupData.password,
-            {
-                firstName: signupData.firstName,
-                lastName: signupData.lastName,
-                role:'patient'
-            }
-        )
-        setLoading(false)
-
-        if (result.success) {
-            // switch to login page when account is created
-            alert("Account was created successfully")
-            navigate('/login')
-        } else{
-            setError(result.error.message || "Failed to create account")
-        }
+    // make sure passwords match
+    if (signupData.password !== signupData.confirmPassword) {
+      setError("Passwords do not match!");
+      setLoading(false);
+      return;
     }
 
-    return (
-    <div className='signUp-container'>
-            <div className='signup-box'>
-                <h2>Create Account</h2>
-    
-                <form onSubmit={handleSubmit}>
-                    <label>First Name</label>
-                    <input
-                        type='text'
-                        name='firstName'
-                        placeholder='First name'
-                        value={signupData.firstName}
-                        onChange={handleChange}
-                    />
+    // call signUpNewUser func
+    const result = await signUpNewUser(signupData.email, signupData.password, {
+      firstName: signupData.firstName,
+      lastName: signupData.lastName,
+      role: "patient",
+    });
 
-                    <label>Last Name</label>
-                    <input
-                        type='text'
-                        name='lastName'
-                        placeholder='Last name'
-                        value={signupData.lastName}
-                        onChange={handleChange}
-                    />
+    setLoading(false);
 
-                    <label>Email</label>
-                    <input
-                        type='email'
-                        name='email'
-                        placeholder='Enter your email'
-                        value={signupData.email}
-                        onChange={handleChange}
-                        required
-                    />
-    
-                    <label>Password</label>
-                    <input
-                        type='password'
-                        name='password'
-                        placeholder='Enter your password'
-                        value={signupData.password}
-                        onChange={handleChange}
-                        required
-                    />
+    if (result.success) {
+      alert("Account was created successfully");
+      navigate("/login");
+    } else {
+      setError(result.error?.message || "Failed to create account");
+    }
+  };
 
-                    <label>Confirm Password</label>
-                    <input
-                        type='password'
-                        name='confirmPassword'
-                        placeholder='Retype password'
-                        value={signupData.confirmPassword}
-                        onChange={handleChange}
-                        required
-                    />
-    
-                    <button type='submit' disabled={loading} className='login-btn'>
-                        {loading ? 'Signing up...' : 'Sign-Up'}
-                        </button> 
-                    {error && <p className='error-message'>{error}</p>}
+  return (
+    <div className="auth-wrapper">
+      <div className="auth-card">
+        {/* top brand + tabs like the GitHub repo */}
+        <header className="auth-header">
+          <div className="auth-brand">CampusCare</div>
 
-                <p className='login-link'>
-                    Already have an account?
-                    <NavLink to={'/login'}>Login</NavLink>
-                </p>
-                </form>
-            </div>
+          <nav className="auth-tabs">
+            <NavLink to="/login" className="auth-tab">
+              Log in
+            </NavLink>
+            <NavLink to="/signup" className="auth-tab auth-tab--active">
+              Register
+            </NavLink>
+          </nav>
+        </header>
+
+        {/* title + subtitle */}
+        <div className="auth-intro">
+          <h1>Create account</h1>
+          <p>Sign up as a patient to manage your care with MediTrack.</p>
         </div>
-  )
-}
 
-export default Signup
+        {/* form */}
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="form-row form-row--two">
+            <div>
+              <label htmlFor="firstName">First name</label>
+              <input
+                id="firstName"
+                type="text"
+                name="firstName"
+                placeholder="First name"
+                value={signupData.firstName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="lastName">Last name</label>
+              <input
+                id="lastName"
+                type="text"
+                name="lastName"
+                placeholder="Last name"
+                value={signupData.lastName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              placeholder="you@example.edu"
+              value={signupData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="form-row form-row--two">
+            <div>
+              <label htmlFor="password">Password</label>
+              <input
+                id="password"
+                type="password"
+                name="password"
+                placeholder="Enter your password"
+                value={signupData.password}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword">Confirm password</label>
+              <input
+                id="confirmPassword"
+                type="password"
+                name="confirmPassword"
+                placeholder="Retype password"
+                value={signupData.confirmPassword}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+
+          {error && <p className="error-message">{error}</p>}
+
+          <button type="submit" disabled={loading} className="auth-btn">
+            {loading ? "Signing up..." : "Sign up"}
+          </button>
+        </form>
+
+        <p className="auth-footer">
+          Already have an account?
+          <NavLink to="/login" className="auth-link">
+            &nbsp;Log in
+          </NavLink>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default Signup;

@@ -1,42 +1,78 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+// src/context/AuthContext.jsx
+import { createContext, useEffect, useState, useContext } from "react";
+import { supabase } from "../supabaseClient";
 
 const AuthContext = createContext();
 
-const STORAGE_KEY = "campuscare_auth_v1";
+export const AuthContextProvider = ({ children }) => {
+  const [session, setSession] = useState(undefined);
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const signUpNewUser = async (email, password, metadata = {}) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: metadata,
+      },
+    });
+
+    if (error) {
+      console.error("Error signing up:", error);
+      return { success: false, error };
+    }
+    return { success: true, data };
+  };
+
+  const signInUser = async (email, password) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.toLowerCase(),
+        password,
+      });
+
+      if (error) {
+        console.error("Sign-in error:", error.message);
+        return { success: false, error: error.message };
+      }
+
+      console.log("Sign-in successful:", data);
+      return { success: true, data };
+    } catch (error) {
+      console.error("Unexpected error during sign-in:", error.message);
+      return {
+        success: false,
+        error: "An unexpected error has occurred. Please try again.",
+      };
+    }
+  };
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) setUser(JSON.parse(saved));
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session ?? null);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session ?? null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async ({ email, password }) => {
-    // demo only: any email works. role by domain hint
-    const role = email.endsWith("@staff.edu") ? "staff" : "student";
-    const profile = { id: crypto.randomUUID(), email, role, name: email.split("@")[0] };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
-    setUser(profile);
-    return profile;
-  };
-
-  const register = async ({ name, email, password, role }) => {
-    const profile = { id: crypto.randomUUID(), name, email, role };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
-    setUser(profile);
-    return profile;
-  };
-
-  const logout = () => {
-    localStorage.removeItem(STORAGE_KEY);
-    setUser(null);
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) console.error("Error signing out:", error);
+    return { success: true };
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider
+      value={{ session, signUpNewUser, signInUser, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   );
-}
+};
+
 export const useAuth = () => useContext(AuthContext);
