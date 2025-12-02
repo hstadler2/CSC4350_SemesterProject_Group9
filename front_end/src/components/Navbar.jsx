@@ -11,6 +11,12 @@ const Navbar = () => {
   const user = session?.user;
   const role = user?.user_metadata?.role;
 
+  // pick prescriptions page based on role
+  const prescriptionsPath =
+    role === "staff" || role === "doctor"
+      ? "/staff/prescriptions"
+      : "/prescriptions";
+
   const toggleMobile = () => setMobileOpen(!mobileOpen);
 
   const handleAuth = async () => {
@@ -24,7 +30,6 @@ const Navbar = () => {
   return (
     <nav className="cc-navbar">
       <div className="cc-navbar-container">
-        
         {/* LOGO */}
         <div className="cc-logo">CampusCare</div>
 
@@ -39,9 +44,11 @@ const Navbar = () => {
               <NavLink to="/appointments" className="cc-link">
                 Appointments<span className="cc-underline"></span>
               </NavLink>
-              <NavLink to="/prescriptions" className="cc-link">
+
+              <NavLink to={prescriptionsPath} className="cc-link">
                 Prescriptions<span className="cc-underline"></span>
               </NavLink>
+
               <NavLink to="/records" className="cc-link">
                 Records<span className="cc-underline"></span>
               </NavLink>
@@ -71,14 +78,29 @@ const Navbar = () => {
       {/* MOBILE MENU */}
       {mobileOpen && (
         <div className="cc-mobile-menu">
-          <NavLink to="/" className="cc-mobile-link">Home</NavLink>
+          <NavLink to="/" className="cc-mobile-link">
+            Home
+          </NavLink>
+
           {user && (
             <>
-              <NavLink to="/appointments" className="cc-mobile-link">Appointments</NavLink>
-              <NavLink to="/prescriptions" className="cc-mobile-link">Prescriptions</NavLink>
-              <NavLink to="/records" className="cc-mobile-link">Records</NavLink>
-              <NavLink to="/schedule" className="cc-mobile-link">Schedule</NavLink>
-              <NavLink to="/settings" className="cc-mobile-link">Settings</NavLink>
+              <NavLink to="/appointments" className="cc-mobile-link">
+                Appointments
+              </NavLink>
+
+              <NavLink to={prescriptionsPath} className="cc-mobile-link">
+                Prescriptions
+              </NavLink>
+
+              <NavLink to="/records" className="cc-mobile-link">
+                Records
+              </NavLink>
+              <NavLink to="/schedule" className="cc-mobile-link">
+                Schedule
+              </NavLink>
+              <NavLink to="/settings" className="cc-mobile-link">
+                Settings
+              </NavLink>
             </>
           )}
 
