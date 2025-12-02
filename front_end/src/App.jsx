@@ -10,7 +10,8 @@ import StudentDashboard from "./pages/StudentDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
 import Appointment from "./pages/Appointment";
 import HealthRecords from "./pages/HealthRecords";
-import Prescriptions from "./pages/Prescriptions";
+import StudentPrescriptions from "./pages/StudentPrescriptions";
+import StaffPrescriptions from "./pages/StaffPrescriptions";
 import Schedule from "./pages/Schedule";
 import Settings from "./pages/Settings";
 
@@ -19,10 +20,10 @@ function ProtectedRoute({ children, roles }) {
   const user = session?.user;
   const role = user?.user_metadata?.role;
 
-  // not logged in
+  // Not logged in → go to login
   if (!user) return <Navigate to="/login" replace />;
 
-  // role-restricted route
+  // If route is role-restricted and user doesn't match → go home
   if (roles && !roles.includes(role)) {
     return <Navigate to="/" replace />;
   }
@@ -33,19 +34,20 @@ function ProtectedRoute({ children, roles }) {
 export default function App() {
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* modern navbar from src/components/Navbar.jsx */}
       <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 py-6">
         <Routes>
+          {/* public */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
+          {/* dashboards */}
           <Route
             path="/student"
             element={
-              <ProtectedRoute roles={["student"]}>
+              <ProtectedRoute>
                 <StudentDashboard />
               </ProtectedRoute>
             }
@@ -54,12 +56,13 @@ export default function App() {
           <Route
             path="/staff"
             element={
-              <ProtectedRoute roles={["staff"]}>
+              <ProtectedRoute roles={["staff", "doctor"]}>
                 <StaffDashboard />
               </ProtectedRoute>
             }
           />
 
+          {/* shared pages */}
           <Route
             path="/appointments"
             element={
@@ -78,15 +81,28 @@ export default function App() {
             }
           />
 
+          {/* prescriptions */}
+          {/* ANY logged-in user can see student prescriptions */}
           <Route
             path="/prescriptions"
             element={
               <ProtectedRoute>
-                <Prescriptions />
+                <StudentPrescriptions />
               </ProtectedRoute>
             }
           />
 
+          {/* ONLY staff / doctors can see staff prescriptions */}
+          <Route
+            path="/staff/prescriptions"
+            element={
+              <ProtectedRoute roles={["staff", "doctor"]}>
+                <StaffPrescriptions />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* schedule & settings */}
           <Route
             path="/schedule"
             element={
