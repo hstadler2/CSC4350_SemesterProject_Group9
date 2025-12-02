@@ -26,7 +26,7 @@ const Navbar = () => {
       <div className="cc-navbar-container">
         
         {/* LOGO */}
-        <div className="cc-logo">CampusCare</div>
+        <div className="cc-logo">MediTrack</div>
 
         {/* DESKTOP LINKS */}
         <div className="cc-nav-links">
