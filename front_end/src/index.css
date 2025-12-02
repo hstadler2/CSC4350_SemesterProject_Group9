@@ -1310,7 +1310,7 @@ body {
   border-radius: 1rem;
   border: 1px solid rgba(148, 163, 184, 0.4);
   padding: 0.8rem;
-  background: #020617;
+  background: #0039A6;
 }
 
 .appointment-calendar__header {
@@ -1322,11 +1322,12 @@ body {
 
 .appointment-calendar__label {
   font-size: 0.8rem;
-  color: #64748b;
+  color: #ffffff;
 }
 
 .appointment-calendar__month {
   font-size: 1rem;
+  color: #ffffff;
 }
 
 .appointment-calendar__nav button {
@@ -1334,7 +1335,7 @@ body {
   height: 26px;
   border-radius: 999px;
   border: 1px solid rgba(148, 163, 184, 0.5);
-  background: #020617;
+  background: #ffffff;
   color: #94a3b8;
   cursor: pointer;
   font-size: 0.8rem;
@@ -1349,7 +1350,7 @@ body {
 
 .appointment-calendar__weekday {
   text-align: center;
-  color: #64748b;
+  color: #ffffff;
   padding-bottom: 0.25rem;
   border-bottom: 1px solid rgba(148, 163, 184, 0.3);
 }
@@ -1389,7 +1390,7 @@ body {
   gap: 0.4rem;
   padding: 0.25rem 0.6rem;
   border-radius: 999px;
-  background: #020617;
+  background: #ffffff;
   border: 1px solid rgba(148, 163, 184, 0.4);
   font-size: 0.75rem;
   color: #64748b;
